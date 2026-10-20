@@ -1,0 +1,4 @@
+import {NextResponse} from 'next/server';
+import {configured,sb} from '@/lib/supabase';
+import {demoProducts,defaultSettings,categoryNames} from '@/lib/catalog';
+export async function GET(){if(!configured())return NextResponse.json({products:demoProducts,categories:categoryNames.map((name,i)=>({id:`demo-${i}`,name,sort_order:i})),brands:[],settings:defaultSettings,demo:true});try{const [products,categories,brands,settings]=await Promise.all([sb('/rest/v1/products?published=eq.true&select=*&order=sort_order.asc&limit=1000'),sb('/rest/v1/categories?select=*&order=sort_order.asc'),sb('/rest/v1/brands?select=*&order=sort_order.asc'),sb<import('@/lib/catalog').Settings[]>('/rest/v1/store_settings?id=eq.1&select=*')]);return NextResponse.json({products,categories,brands,settings:settings[0]||defaultSettings,demo:false});}catch{return NextResponse.json({error:'Katalog belum bisa dimuat. Silakan coba lagi.'},{status:503});}}
